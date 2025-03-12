@@ -1,5 +1,6 @@
 use axum::response::Result;
-use tokio_postgres::{Error, NoTls};
+use std::env;
+use tokio_postgres::{Error, NoTls, Row, row};
 
 pub async fn connect() -> Result<(), Error> {
     // Connect to the database.
@@ -13,9 +14,10 @@ pub async fn connect() -> Result<(), Error> {
             eprintln!("connection error: {}", e);
         }
     });
+    let string = env::var("IG");
 
     // Now we can execute a simple statement that just returns its parameter.
-    let rows = client.query("SELECT $1::TEXT", &[&"hello world"]).await?;
+    let rows: Vec<Row> = client.query("SELECT $1::TEXT", &[&"hello world"]).await?;
 
     Ok(())
 }

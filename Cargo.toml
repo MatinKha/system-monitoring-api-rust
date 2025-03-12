@@ -10,3 +10,6 @@ sysinfo = "0.33.1"
 tokio = { version = "1.32.0", features = ["full"] }
 tokio-postgres = "0.7.13"
 tower = "0.4.13"
+
+[env]
+INFLUX_CONNNECTION_STRING = "value"
