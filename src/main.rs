@@ -1,6 +1,7 @@
 use axum::{Router, response::Result, routing::get};
 use std::net::SocketAddr;
 mod handlers;
+mod repository;
 mod routes;
 mod services;
 
