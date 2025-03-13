@@ -1,6 +1,5 @@
 use std::fmt;
 use sysinfo::System;
-use tokio_postgres;
 
 pub fn fetch_system_info() -> String {
     let mut sys = System::new_all();
