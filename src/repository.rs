@@ -1,12 +1,14 @@
 use axum::response::Result;
-use hyper::client;
-use influxdb2::Client;
+use influxdb2::{Client, RequestError};
 use std::env;
 
-pub async fn connect() -> Result<()> {
-    let host = std::env::var("INFLUXDB_HOST").unwrap();
-    let org = std::env::var("INFLUXDB_ORG").unwrap();
-    let token = std::env::var("INFLUXDB_TOKEN").unwrap();
-    let client = Client::new(host, org, token);
-    Ok(())
+pub mod system_info;
+
+pub async fn get_connection() -> Result<Client, RequestError> {
+    let host = env::var("INFLUXDB_HOST").unwrap();
+    let org = env::var("INFLUXDB_ORG").unwrap();
+    let token = env::var("INFLUXDB_TOKEN").unwrap();
+    let client: Client = Client::new(host, org, token);
+    println!("help meP{}", client.ready().await?.to_string());
+    Ok(client)
 }

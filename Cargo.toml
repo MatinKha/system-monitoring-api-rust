@@ -5,11 +5,10 @@ edition = "2024"
 
 [dependencies]
 axum = "=0.8.1"
+futures = "0.3.31"
 hyper = { version = "0.14.27", features = ["full"] }
 influxdb2 = "0.5.2"
 sysinfo = "0.33.1"
 tokio = { version = "1.32.0", features = ["full"] }
 tower = "0.4.13"
 
-[env]
-INFLUX_CONNNECTION_STRING = "value"
