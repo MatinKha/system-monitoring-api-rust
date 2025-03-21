@@ -1,4 +1,5 @@
 use axum::{Router, response::Result, routing::get};
+use repository::{get_connection, system_info};
 use std::net::SocketAddr;
 mod handlers;
 mod repository;
@@ -8,12 +9,7 @@ mod services;
 #[tokio::main]
 async fn main() {
     let app = routes::create_router();
-
-    let err = services::database::connect().await;
-    match err {
-        Ok(v) => println!("nice it works "),
-        Err(e) => println!("errrrrrrrorr {}", e),
-    }
+    let writeresult = system_info::write_system_info().await;
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     println!("🚀 Server running at http://");
