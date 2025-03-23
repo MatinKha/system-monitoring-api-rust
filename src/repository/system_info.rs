@@ -4,7 +4,7 @@ use sysinfo::System;
 
 use crate::repository::get_connection;
 
-pub async fn write_system_info() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn get_system_info() -> Result<(), Box<dyn std::error::Error>> {
     let connection = match get_connection().await {
         Ok(c) => c,
         Err(e) => {
