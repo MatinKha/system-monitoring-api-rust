@@ -1,3 +1,4 @@
+
 mod handlers;
 mod repository;
 mod services;
@@ -9,6 +10,7 @@ async fn main() {
 
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
     println!("🚀 Server running at http://{}", address);
+
 
     axum::serve(listener, app.into_make_service())
         .await
