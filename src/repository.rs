@@ -1,4 +1,3 @@
-use axum::response::Result;
 use influxdb2::{Client, RequestError};
 use std::env;
 
