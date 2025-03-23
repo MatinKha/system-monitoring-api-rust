@@ -1,0 +1,10 @@
+[package]
+name = "logger_app"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+futures = "0.3.31"
+influxdb2 = "0.5.2"
+sysinfo = "0.33.1"
+tokio = { version = "1.44.1", features = ["full"] }

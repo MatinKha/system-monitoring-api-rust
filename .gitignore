@@ -1,2 +1,4 @@
 /target
 config.toml
+logger_app/target
+logger_app/Cargo.lock
