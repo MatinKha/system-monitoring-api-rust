@@ -1,20 +1,20 @@
 use crate::services::system_info::fetch_system_info;
 use axum::{Json, Router, response::IntoResponse, routing::get};
 
-pub async fn get_system_info() -> impl IntoResponse {
+pub async fn get_cpu() -> impl IntoResponse {
     let info = fetch_system_info();
     Json("sdlfkj");
     return info;
 }
 
-pub async fn restart_system() -> impl IntoResponse {
+pub async fn get_ram() -> impl IntoResponse {
     // Placeholder: Add logic to restart system safely
-    Json("skldfjasdlfj");
-    return "dkfjsdfkl";
+    let json = Json("skldfjasdlfj");
+    return json;
 }
 
 pub fn routes() -> Router {
     Router::new()
-        .route("/", get(get_system_info))
-        .route("/restart", get(restart_system))
+        .route("/cpu", get(get_cpu))
+        .route("/ram", get(get_ram))
 }
