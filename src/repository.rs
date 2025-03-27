@@ -8,6 +8,6 @@ pub async fn get_connection() -> Result<Client, RequestError> {
     let org = env::var("INFLUXDB_ORG").unwrap();
     let token = env::var("INFLUXDB_TOKEN").unwrap();
     let client: Client = Client::new(host, org, token);
-    println!("help meP{}", client.ready().await?.to_string());
+    println!("help meP{}\n", client.ready().await?.to_string());
     Ok(client)
 }

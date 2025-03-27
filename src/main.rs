@@ -1,3 +1,5 @@
+use repository::system_info::get_cpu_info;
+
 mod handlers;
 mod repository;
 mod services;
@@ -9,6 +11,8 @@ async fn main() {
 
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
     println!("🚀 Server running at http://{}", address);
+    let test = get_cpu_info().await;
+    println!("{test:?}");
 
     axum::serve(listener, app.into_make_service())
         .await
