@@ -1,38 +1,50 @@
-use std::{any, collections::BTreeMap, string};
-
 use axum::Json;
-use influxdb2::{FromDataPoint, FromMap, models::Query};
+use chrono::{
+    Datelike, NaiveDate,
+    format::{Parsed, parse_and_remainder},
+};
+use influxdb2::{FromDataPoint, models::Query};
 
 use crate::repository::get_connection;
 
-pub async fn get_cpu_info() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn get_cpu_info(
+    start: NaiveDate,
+    stop: NaiveDate,
+) -> Result<Json<Vec<CpuInfo>>, Box<dyn std::error::Error>> {
     let connection = get_connection().await?;
+    let start_str = format!(
+        "{}-{}-{}",
+        start.year(),
+        start.month0() + 1,
+        start.day0() + 1
+    );
+    let stop_str = format!("{}-{}-{}", stop.year(), stop.month0() + 1, stop.day0() + 1);
+
     let qs = format!(
         "from(bucket: \"systemInfo\")
-        |> range(start: -1w)"
+        |> range(start: {}, stop: {})
+        |> filter(fn: (r) => r._value != 0)
+        |> filter(fn: (r) => r.__measurement == \"cpu\")",
+        start_str, stop_str
     );
     let influx_query = Query::new(qs.to_string());
 
-    println!("help : {influx_query:?} \n\n");
     let result = connection.query::<CpuInfo>(Some(influx_query)).await?;
-    println!("help : {result:?} \n\n");
 
-    for item in result {
-        println!("help : {item:?}");
-    }
-    Ok(())
+    Ok(Json(result))
 }
-#[derive(Debug, FromDataPoint)]
-struct CpuInfo {
-    field: f64,
-    tag: String,
+
+#[derive(Debug, FromDataPoint, serde::Serialize)]
+pub struct CpuInfo {
+    field: String,
+    value: f64,
 }
 
 impl Default for CpuInfo {
     fn default() -> Self {
         Self {
-            field: 0_f64,
-            tag: "".to_string(),
+            field: "".to_string(),
+            value: 0_f64,
         }
     }
 }
