@@ -1,3 +1,5 @@
+use repository::system_info::get_cpu_info;
+
 mod handlers;
 mod repository;
 mod services;
