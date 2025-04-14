@@ -1,37 +1,54 @@
-use axum::Json;
+use axum::{Json, error_handling::HandleError, extract::connect_info::Connected, http::Error};
 use chrono::{
     Datelike, NaiveDate,
     format::{Parsed, parse_and_remainder},
 };
+use futures::future::err;
 use influxdb2::{FromDataPoint, models::Query};
+use tokio::sync::watch::error;
 
 use crate::repository::get_connection;
 
 pub async fn get_cpu_info(
-    start: NaiveDate,
-    stop: NaiveDate,
+    start: &String,
+    stop: &String,
 ) -> Result<Json<Vec<CpuInfo>>, Box<dyn std::error::Error>> {
     let connection = get_connection().await?;
-    let start_str = format!(
-        "{}-{}-{}",
-        start.year(),
-        start.month0() + 1,
-        start.day0() + 1
-    );
-    let stop_str = format!("{}-{}-{}", stop.year(), stop.month0() + 1, stop.day0() + 1);
+    // let start_str = format!(
+    //     "{}-{:02}-{:02}",
+    //     start.year(),
+    //     start.month0() + 1,
+    //     start.day0() + 1
+    // );
+    // let stop_str = format!(
+    //     "{}-{:02}-{:02}",
+    //     stop.year(),
+    //     stop.month0() + 1,
+    //     stop.day0() + 1
+    // );
 
     let qs = format!(
         "from(bucket: \"systemInfo\")
         |> range(start: {}, stop: {})
+        |> aggregateWindow(every: 1m,fn: median)
         |> filter(fn: (r) => r._value != 0)
-        |> filter(fn: (r) => r.__measurement == \"cpu\")",
-        start_str, stop_str
+        |> filter(fn: (r) => r._measurement == \"cpu\")",
+        start, stop
     );
     let influx_query = Query::new(qs.to_string());
 
-    let result = connection.query::<CpuInfo>(Some(influx_query)).await?;
-
-    Ok(Json(result))
+    println!("res :::::: {influx_query:?}");
+    let result = connection.query::<CpuInfo>(Some(influx_query)).await;
+    match result {
+        Ok(t) => {
+            println!("{t:?}");
+            return Ok(Json(t));
+        }
+        Err(e) => {
+            println!("{e:?}");
+            panic!("err");
+        }
+    }
 }
 
 #[derive(Debug, FromDataPoint, serde::Serialize)]
