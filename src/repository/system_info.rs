@@ -1,10 +1,18 @@
+use std::{
+    alloc::System,
+    time::{SystemTime, UNIX_EPOCH},
+};
+
 use axum::{Json, error_handling::HandleError, extract::connect_info::Connected, http::Error};
 use chrono::{
-    Datelike, NaiveDate,
+    DateTime, Datelike, FixedOffset, NaiveDate,
     format::{Parsed, parse_and_remainder},
 };
 use futures::future::err;
-use influxdb2::{FromDataPoint, models::Query};
+use influxdb2::{
+    FromDataPoint,
+    models::{Query, ast::dialect::DateTimeFormat},
+};
 use tokio::sync::watch::error;
 
 use crate::repository::get_connection;
@@ -30,15 +38,16 @@ pub async fn get_cpu_info(
     let qs = format!(
         "from(bucket: \"systemInfo\")
         |> range(start: {}, stop: {})
-        |> aggregateWindow(every: 1m,fn: median)
+        |> aggregateWindow(every: 1h ,fn: median)
         |> filter(fn: (r) => r._value != 0)
         |> filter(fn: (r) => r._measurement == \"cpu\")",
         start, stop
     );
     let influx_query = Query::new(qs.to_string());
 
-    println!("res :::::: {influx_query:?}");
+    // println!("res :::::: {influx_query:?}");
     let result = connection.query::<CpuInfo>(Some(influx_query)).await;
+    println!("res :::::: {result:?}");
     match result {
         Ok(t) => {
             println!("{t:?}");
@@ -46,7 +55,7 @@ pub async fn get_cpu_info(
         }
         Err(e) => {
             println!("{e:?}");
-            panic!("err");
+            panic!("err{e:?}");
         }
     }
 }
@@ -55,6 +64,7 @@ pub async fn get_cpu_info(
 pub struct CpuInfo {
     field: String,
     value: f64,
+    time: DateTime<FixedOffset>,
 }
 
 impl Default for CpuInfo {
@@ -62,6 +72,7 @@ impl Default for CpuInfo {
         Self {
             field: "".to_string(),
             value: 0_f64,
+            time: DateTime::<FixedOffset>::default(),
         }
     }
 }
